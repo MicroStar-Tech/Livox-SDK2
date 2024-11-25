@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.21)
 
 set(SDK_LIBRARY_STATIC livox_lidar_sdk_static)
 set(SDK_LIBRARY_SHARED livox_lidar_sdk_shared)
@@ -42,12 +42,13 @@ target_compile_options(${SDK_LIBRARY_SHARED}
 
 set(LIVOX_PRIVATE_INCLUDE_DIR 
         ../3rdparty 
-        ../3rdparty/spdlog 
         .
         )
 set(LIVOX_PUBLIC_INCLUDE_DIR 
         ../include
         )
+
+find_package(RapidJSON REQUIRED)
 
 target_include_directories(
         ${SDK_LIBRARY_STATIC}
@@ -55,6 +56,7 @@ target_include_directories(
         ${LIVOX_PUBLIC_INCLUDE_DIR}
         PRIVATE
         ${LIVOX_PRIVATE_INCLUDE_DIR}
+        ${RapidJSON_INCLUDE_DIRS}
         )        
 target_include_directories(
         ${SDK_LIBRARY_SHARED}
@@ -62,6 +64,20 @@ target_include_directories(
         ${LIVOX_PUBLIC_INCLUDE_DIR}
         PRIVATE
         ${LIVOX_PRIVATE_INCLUDE_DIR}
+	${RapidJSON_INCLUDE_DIRS}
+        )
+
+find_package(spdlog REQUIRED)
+	
+target_link_libraries(
+        ${SDK_LIBRARY_STATIC}
+        PRIVATE
+	spdlog::spdlog
+        )
+target_link_libraries(
+        ${SDK_LIBRARY_SHARED}
+        PRIVATE
+	spdlog::spdlog
         )
 
 set(MAIN_SOURCES
