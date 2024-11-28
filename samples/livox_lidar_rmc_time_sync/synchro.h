@@ -25,99 +25,97 @@
 #ifndef SYNCHRO_H_
 #define SYNCHRO_H_
 
-#include <functional>
-#include <memory>
 #include <stdint.h>
-#include <string>
+#include <memory>
 #include <thread>
 #include <vector>
+#include <string>
+#include <functional>
 #ifdef WIN32
-    #include <Windows.h>
+#include <Windows.h>
 #endif
 
-using UtcTimerCallback = std::function<void(const char * rmc, uint16_t rmc_length)>;
+using UtcTimerCallback = std::function<void(const char* rmc, uint16_t rmc_length)>;
 
-#define READ_BUF (256)
-const char * const kGPRMC{ "$GPRMC" };
-const char * const kGNRMC{ "$GNRMC" };
+# define READ_BUF (256)
+const char * const kGPRMC{"$GPRMC"};
+const char * const kGNRMC{"$GNRMC"};
 
-enum Parity
-{
-    P_8N1, /* No parity (8N1)	*/
-    P_7E1, /* Even parity (7E1)*/
-    P_7O1, /* Odd parity (7O1)	*/
-    P_7S1  /* Space parity is setup the same as no parity (7S1)	*/
+enum Parity {
+  P_8N1,    /* No parity (8N1)	*/     
+  P_7E1,    /* Even parity (7E1)*/
+  P_7O1,    /* Odd parity (7O1)	*/
+  P_7S1     /* Space parity is setup the same as no parity (7S1)	*/
 };
 
-enum BaudRate
-{
-    BR2400,
-    BR4800,
-    BR9600,
-    BR19200,
-    BR38400,
-    BR57600,
-    BR115200,
-    BR230400,
-    BR460800,
-    BR500000,
-    BR576000,
-    BR921600,
-    BR1152000,
-    BR1500000,
-    BR2000000,
-    BR2500000,
-    BR3000000,
-    BR3500000,
-    BR4000000,
+enum BaudRate {
+  BR2400,
+  BR4800,
+  BR9600,
+  BR19200,
+  BR38400,
+  BR57600,
+  BR115200,
+  BR230400,
+  BR460800,
+  BR500000,
+  BR576000,
+  BR921600,
+  BR1152000,
+  BR1500000,
+  BR2000000,
+  BR2500000,
+  BR3000000,
+  BR3500000,
+  BR4000000,
 };
 
-class Synchro
-{
+
+class Synchro {
+
 public:
-    Synchro();
-    ~Synchro();
+  Synchro();
+  ~Synchro();
 
-    static Synchro & GetInstance()
-    {
-        static Synchro synchro;
-        return synchro;
-    }
-
-    bool Start();
-    void Stop();
-    void SetBaudRate(BaudRate baudrate);
-    void SetPortName(std::string port_name);
-    void SetParity(Parity parity);
-    void SetSyncTimerCallback(UtcTimerCallback cb);
+  static Synchro& GetInstance() {
+    static Synchro synchro;
+    return synchro;
+  }
+  
+  bool Start();
+  void Stop();
+  void SetBaudRate(BaudRate baudrate);
+  void SetPortName(std::string port_name);
+  void SetParity(Parity parity);
+  void SetSyncTimerCallback(UtcTimerCallback cb);
 
 private:
-    int Setup(enum BaudRate baud, enum Parity parity);
-    void Close();
-    bool Open();
-    void IOLoop();
-    size_t Read(uint8_t * buffer, size_t size);
-    void Decode(uint8_t * buff, size_t size);
-    bool ParseGps(uint8_t in_byte);
-    void Clear();
+  int Setup(enum BaudRate baud, enum Parity parity);
+  void Close();
+  bool Open();
+  void IOLoop();
+  size_t Read(uint8_t *buffer, size_t size);
+  void Decode(uint8_t* buff, size_t size);
+  bool ParseGps(uint8_t in_byte);
+  void Clear();
 
 #ifdef WIN32
-    HANDLE hfile_;
+  HANDLE  hfile_;
 #else
-    int fd_;
+  int fd_;
 #endif
 
-    enum BaudRate baudrate_;
-    enum Parity parity_;
-    std::string port_name_;
+  enum BaudRate baudrate_;
+  enum Parity parity_;
+  std::string port_name_;
 
-    std::function<void(const char * rmc, uint16_t rmc_length)> sync_timer_cb_;
+  std::function<void(const char* rmc, uint16_t rmc_length)> sync_timer_cb_;
 
-    bool is_quit_;
-    std::shared_ptr<std::thread> listener_;
+  bool is_quit_;
+  std::shared_ptr<std::thread> listener_;
 
-    std::vector<char> rmc_buff_;
-    uint16_t cur_len_;
+  std::vector<char> rmc_buff_;
+  uint16_t cur_len_;
 };
 
 #endif

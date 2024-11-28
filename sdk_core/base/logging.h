@@ -24,35 +24,29 @@
 
 #ifndef LIVOX_LOGGING_H_
 #define LIVOX_LOGGING_H_
-#include "spdlog/sinks/rotating_file_sink.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 
 #ifdef _WIN32
-    #define __FILENAME__ (strrchr(__FILE__, '\\') ? (strrchr(__FILE__, '\\') + 1) : __FILE__)
+#define __FILENAME__ (strrchr(__FILE__, '\\') ? (strrchr(__FILE__, '\\') + 1):__FILE__)
 #else
-    #define __FILENAME__ (strrchr(__FILE__, '/') ? (strrchr(__FILE__, '/') + 1) : __FILE__)
+#define __FILENAME__ (strrchr(__FILE__, '/') ? (strrchr(__FILE__, '/') + 1):__FILE__)
 #endif
 
 #ifndef suffix
-    #define suffix(msg)                                                                            \
-        std::string(msg)                                                                           \
-            .append("  [")                                                                         \
-            .append(__FILENAME__)                                                                  \
-            .append("] [")                                                                         \
-            .append(__func__)                                                                      \
-            .append("] [")                                                                         \
-            .append(std::to_string(__LINE__))                                                      \
-            .append("]")                                                                           \
-            .c_str()
+#define suffix(msg)  std::string(msg).append("  [")\
+        .append(__FILENAME__).append("] [").append(__func__)\
+        .append("] [").append(std::to_string(__LINE__))\
+        .append("]").c_str()
 #endif
 
 #ifndef SPDLOG_TRACE_ON
-    #define SPDLOG_TRACE_ON
+#define SPDLOG_TRACE_ON
 #endif
 
 #ifndef SPDLOG_DEBUG_ON
-    #define SPDLOG_DEBUG_ON
+#define SPDLOG_DEBUG_ON
 #endif
 
 extern std::shared_ptr<spdlog::logger> logger;
@@ -69,4 +63,4 @@ void UninitLogger();
 #define LOG_ERROR(msg, ...) logger->error(suffix(msg), ##__VA_ARGS__)
 #define LOG_FATAL(msg, ...) logger->critical(suffix(msg), ##__VA_ARGS__)
 
-#endif // LIVOX_LOGGING_H_
+#endif  // LIVOX_LOGGING_H_

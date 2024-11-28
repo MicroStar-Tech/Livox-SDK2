@@ -31,143 +31,118 @@ namespace lidar {
 
 const uint8_t kSdkProtocolSof = 0xAA;
 const uint8_t kSdkVer = 0;
-const uint32_t kSdkPacketCrcSize = 4;         // crc32
-const uint32_t kSdkPacketPreambleCrcSize = 2; // crc16
+const uint32_t kSdkPacketCrcSize = 4;          // crc32
+const uint32_t kSdkPacketPreambleCrcSize = 2;  // crc16
 
 SdkProtocol::SdkProtocol() {}
 
-SdkProtocol::~SdkProtocol() {}
-
-int32_t
-SdkProtocol::Pack(uint8_t * o_buf, uint32_t o_buf_size, uint32_t * o_len,
-                  const CommPacket & i_packet)
-{
-    if(kLidarSdk != i_packet.protocol)
-    {
-        return -1;
-    }
-
-    SdkPacket * sdk_packet = (SdkPacket *)o_buf;
-
-    sdk_packet->sof = kSdkProtocolSof;
-    sdk_packet->version = kSdkVer;
-    sdk_packet->length = i_packet.data_len + GetPacketWrapperLen();
-    if(sdk_packet->length > o_buf_size)
-    {
-        return -1;
-    }
-
-    sdk_packet->seq_num = i_packet.seq_num & 0xFFFF;
-    sdk_packet->cmd_id = i_packet.cmd_id;
-    sdk_packet->cmd_type = i_packet.cmd_type;
-    sdk_packet->sender_type = i_packet.sender_type;
-
-    sdk_packet->crc16_h = crc_16_.ccitt(o_buf, 18);
-
-    if(i_packet.data_len == 0)
-    {
-        sdk_packet->crc32_d = 0;
-    }
-    else
-    {
-        sdk_packet->crc32_d = crc_32_.crc32(i_packet.data, i_packet.data_len);
-    }
-
-    memcpy(sdk_packet->data, i_packet.data, i_packet.data_len);
-
-    *o_len = sdk_packet->length;
-
-    return 0;
+SdkProtocol::~SdkProtocol() {
 }
 
-bool
-SdkProtocol::ParsePacket(uint8_t * i_buf, uint32_t buf_size, CommPacket * o_packet)
-{
-    SdkPacket * sdk_packet = (SdkPacket *)i_buf;
+int32_t SdkProtocol::Pack(uint8_t *o_buf, uint32_t o_buf_size, uint32_t *o_len, const CommPacket &i_packet) {
+  if (kLidarSdk != i_packet.protocol) {
+    return -1;
+  }
 
-    if(buf_size < GetPacketWrapperLen())
-    {
-        return false;
-    }
+  SdkPacket *sdk_packet = (SdkPacket *)o_buf;
 
-    memset((void *)o_packet, 0, sizeof(CommPacket));
+  sdk_packet->sof = kSdkProtocolSof;
+  sdk_packet->version = kSdkVer;
+  sdk_packet->length = i_packet.data_len + GetPacketWrapperLen();
+  if (sdk_packet->length > o_buf_size) {
+    return -1;
+  }
 
-    o_packet->protocol = kLidarSdk;
-    o_packet->version = sdk_packet->version;
-    o_packet->seq_num = sdk_packet->seq_num;
-    o_packet->cmd_id = sdk_packet->cmd_id;
-    o_packet->cmd_type = sdk_packet->cmd_type;
-    o_packet->sender_type = sdk_packet->sender_type;
-    o_packet->data = sdk_packet->data;
-    o_packet->data_len = sdk_packet->length - GetPacketWrapperLen();
-    return true;
+  sdk_packet->seq_num = i_packet.seq_num & 0xFFFF;
+  sdk_packet->cmd_id = i_packet.cmd_id;
+  sdk_packet->cmd_type = i_packet.cmd_type;
+  sdk_packet->sender_type = i_packet.sender_type;
+
+  sdk_packet->crc16_h = crc_16_.ccitt(o_buf, 18);
+
+  if (i_packet.data_len == 0) {
+    sdk_packet->crc32_d = 0;
+  }  else {
+    sdk_packet->crc32_d = crc_32_.crc32(i_packet.data, i_packet.data_len);
+  }
+
+  memcpy(sdk_packet->data, i_packet.data, i_packet.data_len);
+
+  *o_len = sdk_packet->length;
+
+  return 0;
 }
 
-uint32_t
-SdkProtocol::GetPreambleLen()
-{
-    return sizeof(SdkPreamble);
+bool SdkProtocol::ParsePacket(uint8_t *i_buf, uint32_t buf_size, CommPacket *o_packet) {
+  SdkPacket *sdk_packet = (SdkPacket *)i_buf;
+
+  if (buf_size < GetPacketWrapperLen()) {
+    return false;
+  }
+
+  memset((void *)o_packet, 0, sizeof(CommPacket));
+
+  o_packet->protocol = kLidarSdk;
+  o_packet->version = sdk_packet->version;
+  o_packet->seq_num = sdk_packet->seq_num;
+  o_packet->cmd_id = sdk_packet->cmd_id;
+  o_packet->cmd_type = sdk_packet->cmd_type;
+  o_packet->sender_type = sdk_packet->sender_type;
+  o_packet->data = sdk_packet->data;
+  o_packet->data_len = sdk_packet->length - GetPacketWrapperLen();
+  return true;
 }
 
-uint32_t
-SdkProtocol::GetPacketWrapperLen()
-{
-    return sizeof(SdkPacket) - 1;
+uint32_t SdkProtocol::GetPreambleLen() {
+  return sizeof(SdkPreamble);
 }
 
-uint32_t
-SdkProtocol::GetPacketLen(uint8_t * buf)
-{
-    SdkPreamble * preamble = (SdkPreamble *)buf;
-    return preamble->length;
+uint32_t SdkProtocol::GetPacketWrapperLen() {
+  return sizeof(SdkPacket) - 1;
 }
 
-bool
-SdkProtocol::CheckPreamble(uint8_t * buf, uint32_t buf_size)
-{
-    if(buf_size < GetPreambleLen())
-    {
-        return false;
-    }
-
-    SdkPacket * packet = (SdkPacket *)buf;
-    if(packet->sof != kSdkProtocolSof)
-    {
-        return false;
-    }
-
-    if(packet->version != kSdkVer)
-    {
-        return false;
-    }
-
-    if(packet->length < GetPreambleLen())
-    {
-        return false;
-    }
-
-    uint16_t crc16_h = crc_16_.ccitt(buf, 18);
-    if(packet->crc16_h != crc16_h)
-    {
-        return false;
-    }
-
-    uint32_t crc32_d = 0;
-    if(packet->length - GetPacketWrapperLen() == 0)
-    {
-        crc32_d = 0;
-    }
-    else
-    {
-        crc32_d = crc_32_.crc32(packet->data, packet->length - GetPacketWrapperLen());
-    }
-
-    if(packet->crc32_d != crc32_d)
-    {
-        return false;
-    }
-    return true;
+uint32_t SdkProtocol::GetPacketLen(uint8_t *buf) {
+  SdkPreamble *preamble = (SdkPreamble *)buf;
+  return preamble->length;
 }
+
+bool SdkProtocol::CheckPreamble(uint8_t *buf, uint32_t buf_size) {
+  if (buf_size < GetPreambleLen()) {
+    return false;
+  }
+
+  SdkPacket *packet = (SdkPacket *)buf;
+  if (packet->sof != kSdkProtocolSof) {
+    return false;
+  }
+
+  if (packet->version != kSdkVer) {
+    return false;
+  }
+
+  if (packet->length < GetPreambleLen()) {
+    return false;
+  }
+
+  uint16_t crc16_h = crc_16_.ccitt(buf, 18);
+  if (packet->crc16_h != crc16_h) {
+    return false;
+  }
+
+
+  uint32_t crc32_d = 0;
+   if (packet->length - GetPacketWrapperLen() == 0) {
+    crc32_d = 0;
+  } else {
+    crc32_d = crc_32_.crc32(packet->data, packet->length - GetPacketWrapperLen());
+  }
+  
+  if (packet->crc32_d != crc32_d) {
+    return false;
+  }
+  return true;
+}
+
 
 } // namespace lidar
-} // namespace livox
+}  // namespace livox

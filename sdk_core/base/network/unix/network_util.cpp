@@ -22,117 +22,100 @@
 // SOFTWARE.
 //
 #ifndef WIN32
-    #include "base/network/network_util.h"
-    #include <ifaddrs.h>
-    #include <netdb.h>
-    #include <string.h>
-    #include <string>
-    #include <sys/ioctl.h>
-    #include <unistd.h>
+#include "base/network/network_util.h"
+#include <ifaddrs.h>
+#include <string>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <netdb.h>
 
 namespace livox {
 namespace lidar {
 namespace util {
 
-socket_t
-CreateSocket(uint16_t port, bool nonblock, bool reuse_port, bool is_broadcast,
-             const std::string netif, const std::string multicast_ip)
-{
-    int status = -1;
-    int on = -1;
-    int sock = -1;
-    int recv_buff_size = 1024 * 1024 * 200;
-    struct sockaddr_in servaddr;
+socket_t CreateSocket(uint16_t port, bool nonblock, bool reuse_port, bool is_broadcast, const std::string netif, const std::string multicast_ip) {
+  int status = -1;
+  int on = -1;
+  int sock = -1;
+  int recv_buff_size = 1024 * 1024 * 200;
+  struct sockaddr_in servaddr;
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if(sock < 0)
-    {
-        printf("create failed\n");
-        return -1;
-    }
+  sock = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sock < 0) {
+    printf("create failed\n");
+    return -1;
+  }
 
-    if(nonblock)
-    {
-        status = ioctl(sock, FIONBIO, (char *)&on);
-        if(status != 0)
-        {
-            printf("noblock failed\n");
-            close(sock);
-            return -1;
-        }
+  if (nonblock) {
+    status = ioctl(sock, FIONBIO, (char*)&on);
+    if (status != 0) {
+      printf("noblock failed\n");
+      close(sock);
+      return -1;
     }
+  }
 
-    if(reuse_port)
-    {
-        status = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
-        if(status != 0)
-        {
-            printf("reuse port failed\n");
-            close(sock);
-            return -1;
-        }
-    }
-    status
-        = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&recv_buff_size, sizeof(recv_buff_size));
-    if(status != 0)
-    {
-        close(sock);
-        return -1;
-    }
+  if (reuse_port) {
+    status = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                        (char *) &on, sizeof (on));
+    if (status != 0) {
+      printf("reuse port failed\n");
+      close(sock);
+      return -1;
+   }
+  }
+  status = setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
+	  (char *)&recv_buff_size, sizeof(recv_buff_size));
+  if (status != 0) {
+	  close(sock);
+	  return -1;
+  }
 
-    memset(&servaddr, 0, sizeof(servaddr));
+  memset(&servaddr, 0, sizeof(servaddr));
 
-    // Filling server information
-    servaddr.sin_family = AF_INET; // IPv4
-    if(netif.empty())
-    {
-        servaddr.sin_addr.s_addr = INADDR_ANY;
+  // Filling server information
+  servaddr.sin_family    = AF_INET; // IPv4
+  if (netif.empty()) {
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+  } else {
+    if(!multicast_ip.empty()){
+      servaddr.sin_addr.s_addr = inet_addr(multicast_ip.c_str());
+    } else {
+      servaddr.sin_addr.s_addr = inet_addr(netif.c_str());
     }
-    else
-    {
-        if(!multicast_ip.empty())
-        {
-            servaddr.sin_addr.s_addr = inet_addr(multicast_ip.c_str());
-        }
-        else
-        {
-            servaddr.sin_addr.s_addr = inet_addr(netif.c_str());
-        }
-    }
-    servaddr.sin_port = htons(port);
+  }
+  servaddr.sin_port = htons(port);
 
-    status = bind(sock, (const struct sockaddr *)&servaddr, sizeof(servaddr));
-    if(status != 0)
-    {
-        printf("bind failed\n");
-        close(sock);
-        return -1;
-    }
+  status = bind(sock, (const struct sockaddr *)&servaddr, sizeof(servaddr));
+  if (status != 0) {
+    printf("bind failed\n");
+    close(sock);
+    return -1;
+  }
 
-    if(is_broadcast)
-    {
-        status = setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&on, sizeof(on));
-        if(status != 0)
-        {
-            close(sock);
-            printf("broad cast failed\n");
-            return -1;
-        }
+  if (is_broadcast) {
+    status = setsockopt(sock, SOL_SOCKET, SO_BROADCAST,
+                        (char *)&on, sizeof(on));
+    if (status != 0) {
+      close(sock);
+      printf("broad cast failed\n");
+      return -1;
     }
+  }
 
-    if(!multicast_ip.empty())
-    {
-        struct ip_mreq mreq;
-        bzero(&mreq, sizeof(struct ip_mreq));
-        mreq.imr_interface.s_addr = inet_addr(netif.c_str());
-        mreq.imr_multiaddr.s_addr = inet_addr(multicast_ip.c_str());
-        if(setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(struct ip_mreq)) == -1)
-        {
-            printf("setsockopt failed\n");
-        }
+  if (!multicast_ip.empty()) {
+    struct ip_mreq mreq;
+    bzero(&mreq, sizeof(struct ip_mreq));
+    mreq.imr_interface.s_addr = inet_addr(netif.c_str());
+    mreq.imr_multiaddr.s_addr = inet_addr(multicast_ip.c_str());
+    if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(struct ip_mreq)) == -1) {
+      printf("setsockopt failed\n");
     }
-    return sock;
+  }
+  return sock;
 }
+
 
 // socket_t CreateSocket(uint16_t port, bool nonblock, bool reuse_port, bool is_broadcast) {
 //   int status = -1;
@@ -187,63 +170,49 @@ CreateSocket(uint16_t port, bool nonblock, bool reuse_port, bool is_broadcast,
 //   return sock;
 // }
 
-void
-CloseSock(int sock)
-{
-    if(sock > 0)
-    {
-        close(sock);
-    }
+void CloseSock(int sock) {
+  if (sock > 0) {
+    close(sock);
+  }
 }
 
-bool
-FindLocalIp(const struct sockaddr_in & client_addr, uint32_t & local_ip)
-{
-    struct ifaddrs *if_addrs = NULL, *addrs = NULL;
-    if(getifaddrs(&if_addrs) == -1)
+bool FindLocalIp(const struct sockaddr_in &client_addr, uint32_t &local_ip) {
+  struct ifaddrs *if_addrs = NULL, *addrs = NULL;
+  if (getifaddrs(&if_addrs) == -1) {
+    return false;
+  }
+  addrs = if_addrs;
+  bool found = false;
+  while (if_addrs != NULL) {
+    if ((if_addrs->ifa_addr != NULL) && (if_addrs->ifa_addr->sa_family == AF_INET))  // check it is IP4
     {
-        return false;
-    }
-    addrs = if_addrs;
-    bool found = false;
-    while(if_addrs != NULL)
-    {
-        if((if_addrs->ifa_addr != NULL)
-           && (if_addrs->ifa_addr->sa_family == AF_INET)) // check it is IP4
-        {
-            // is a connected IP4 Address
-            struct sockaddr_in * ifu_localaddr = (struct sockaddr_in *)if_addrs->ifa_addr;
-            struct sockaddr_in * ifu_netmask = (struct sockaddr_in *)if_addrs->ifa_netmask;
-            if(ifu_localaddr->sin_addr.s_addr != htonl(INADDR_ANY))
-            {
-                if((ifu_localaddr->sin_addr.s_addr & ifu_netmask->sin_addr.s_addr)
-                   == (client_addr.sin_addr.s_addr & ifu_netmask->sin_addr.s_addr))
-                {
-                    local_ip = ifu_localaddr->sin_addr.s_addr;
-                    found = true;
-                    break;
-                }
-            }
+      // is a connected IP4 Address
+      struct sockaddr_in *ifu_localaddr = (struct sockaddr_in *)if_addrs->ifa_addr;
+      struct sockaddr_in *ifu_netmask = (struct sockaddr_in *)if_addrs->ifa_netmask;
+      if (ifu_localaddr->sin_addr.s_addr != htonl(INADDR_ANY)) {
+        if ((ifu_localaddr->sin_addr.s_addr & ifu_netmask->sin_addr.s_addr) ==
+            (client_addr.sin_addr.s_addr & ifu_netmask->sin_addr.s_addr)) {
+          local_ip = ifu_localaddr->sin_addr.s_addr;
+          found = true;
+          break;
         }
-        if_addrs = if_addrs->ifa_next;
+      }
     }
+    if_addrs = if_addrs->ifa_next;
+  }
 
-    if(addrs)
-    {
-        freeifaddrs(addrs);
-    }
-    return found;
+  if (addrs) {
+    freeifaddrs(addrs);
+  }
+  return found;
 }
 
-size_t
-RecvFrom(socket_t & sock, void * buff, size_t buf_size, int flag, struct sockaddr * addr,
-         int * addrlen)
-{
-    return recvfrom(sock, buff, buf_size, 0, addr, (socklen_t *)addrlen);
+size_t RecvFrom(socket_t &sock, void *buff,  size_t buf_size, int flag, struct sockaddr *addr, int *addrlen) {
+  return recvfrom(sock, buff, buf_size, 0, addr, (socklen_t *)addrlen);
 }
 
-} // namespace util
+}  // namespace util
 } // namespace lidar
-} // namespace livox
+}  // namespace livox
 
-#endif // WIN32
+#endif  // WIN32
