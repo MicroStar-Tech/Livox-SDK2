@@ -1,2 +1,85 @@
-.vscode
-build
+# Build
+cmake-build-debug/
+cmake-build-release/
+build/
+build_*/
+
+# data files
+*.dat
+**/data/**
+**/data
+data_raw.*
+
+# conf files
+**/conf/**
+**/conf
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.run
+*.exe
+*.out
+*.app
+
+# Matlab
+*.mat
+*.asv
+
+# VSCode
+**/.vscode/**
+
+# CLion
+.idea/
+
+# bin files
+*.pdf
+*.doc
+*.docx
+*.csv
+*.xlsx
+*.xls
+
+# temp files
+*~
+**/log/**
+**/log
+**/debug/**
+**/debug
+*.tmp
+**/tmp/**
+**/tmp
+**/pcd/**
+**/pcd
+**/VM_data/**
+**/VM_data
+doc/
+
+#Misc
+*.pcd
