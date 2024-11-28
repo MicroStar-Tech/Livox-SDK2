@@ -33,10 +33,10 @@
 #elif defined(_WIN32)
     #include <winsock2.h>
     #define HAVE_SELECT 1
-#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined (__NetBSD__)
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+    #include <fcntl.h>
     #include <sys/event.h>
     #include <sys/types.h>
-    #include <fcntl.h>
     #include <unistd.h>
     #define HAVE_KQUEUE 1
 #else
@@ -44,6 +44,4 @@
     #define HAVE_POLL 1
 #endif
 
-#endif  // CONFIG_H_
-
-
+#endif // CONFIG_H_
