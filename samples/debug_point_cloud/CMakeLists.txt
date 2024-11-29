@@ -7,3 +7,5 @@ target_link_libraries(${DEMO_NAME}
         PUBLIC
         livox_lidar_sdk_static)
 
+target_compile_options(${DEMO_NAME} PRIVATE ${SDK_EXAMPLE_COMPILE_OPTIONS})
+target_link_options(${DEMO_NAME} PRIVATE ${SDK_EXAMPLE_COMPILE_OPTIONS})

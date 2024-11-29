@@ -16,6 +16,15 @@ if (UNIX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif(UNIX)
 
+set(SDK_EXAMPLE_COMPILE_OPTIONS
+    $<$<CXX_COMPILER_ID:GNU>:-Wall>
+    $<$<CXX_COMPILER_ID:AppleClang>:-Wno-unknown-pragmas -Wall -Werror>
+    $<$<CXX_COMPILER_ID:Clang>:-Wno-unknown-pragmas -Wall -Werror>
+    $<$<CXX_COMPILER_ID:GNU>:-flto=auto>
+    $<$<CXX_COMPILER_ID:Clang>:-flto=thin>
+    -O3
+)
+
 add_subdirectory(livox_lidar_quick_start)
 add_subdirectory(multi_lidars_upgrade)
 add_subdirectory(logger)

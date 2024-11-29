@@ -40,6 +40,82 @@ target_compile_options(${SDK_LIBRARY_SHARED}
         PRIVATE $<$<CXX_COMPILER_ID:Clang>:-Wno-unknown-pragmas -Wall -Werror -Wno-c++11-long-long>
         )
 
+# Options for optimization
+target_compile_options(${SDK_LIBRARY_STATIC}
+        PRIVATE $<$<CXX_COMPILER_ID:GNU>:-flto=auto>
+        PRIVATE $<$<CXX_COMPILER_ID:Clang>:-flto=thin>
+        PRIVATE -O3
+        )
+
+target_compile_options(${SDK_LIBRARY_SHARED}
+        PRIVATE $<$<CXX_COMPILER_ID:GNU>:-flto=auto>
+        PRIVATE $<$<CXX_COMPILER_ID:Clang>:-flto=thin>
+        PRIVATE -O3
+        )
+
+# It's not necessary to add the optimization options to the link options for static library because
+# the linkage of objects is done when building the downstream executables. flto (link time optimization)
+# is made public to ensure the downstream executables are built with flto turned to conduct the link
+# optimization for this static library.
+target_link_options(${SDK_LIBRARY_STATIC}
+        PUBLIC $<$<CXX_COMPILER_ID:GNU>:-flto=auto>
+        PUBLIC $<$<CXX_COMPILER_ID:Clang>:-flto=thin>
+        )
+
+target_link_options(${SDK_LIBRARY_SHARED}
+        PRIVATE $<$<CXX_COMPILER_ID:GNU>:-flto=auto>
+        PRIVATE $<$<CXX_COMPILER_ID:Clang>:-flto=thin>
+        PRIVATE -O3
+        )
+
+# Options for enable gdb symbols
+set(MICROSTAR_GDB_COMPILE_OPTIONS
+        -g3
+        )
+
+if(${MICROSTAR_DEBUG_GDB})
+        target_compile_options(${SDK_LIBRARY_STATIC}
+                PRIVATE ${MICROSTAR_GDB_COMPILE_OPTIONS}
+                )
+        target_link_options(${SDK_LIBRARY_STATIC}
+                PRIVATE ${MICROSTAR_GDB_COMPILE_OPTIONS}
+                )
+        target_compile_options(${SDK_LIBRARY_SHARED}
+                PRIVATE ${MICROSTAR_GDB_COMPILE_OPTIONS}
+                )
+        target_link_options(${SDK_LIBRARY_SHARED}
+                PRIVATE ${MICROSTAR_GDB_COMPILE_OPTIONS}
+                )
+endif()
+
+# Options for enable memcheck
+set(MICROSTAR_MEMCHECK_COMPILE_OPTIONS
+        --param=max-vartrack-size=60000000
+        -fsanitize=address,pointer-compare,pointer-subtract
+        -fsanitize=undefined,bounds-strict
+        -fsanitize=leak
+        -fsanitize=alignment,object-size,pointer-overflow,unreachable,vla-bound
+        -fsanitize=null,return,signed-integer-overflow,float-divide-by-zero,float-cast-overflow
+        -fsanitize=vptr,builtin
+        )
+
+if(${MICROSTAR_DEBUG_MEMCHECK})
+# the memory check options must be enabled for all translation units including the downstream projects
+# so make them public
+        target_compile_options(${SDK_LIBRARY_STATIC}
+                PUBLIC ${MICROSTAR_MEMCHECK_COMPILE_OPTIONS}
+                )
+        target_compile_options(${SDK_LIBRARY_SHARED}
+                PUBLIC ${MICROSTAR_MEMCHECK_COMPILE_OPTIONS}
+                )
+        target_link_options(${SDK_LIBRARY_STATIC}
+                PUBLIC ${MICROSTAR_MEMCHECK_COMPILE_OPTIONS}
+                )
+        target_link_options(${SDK_LIBRARY_SHARED}
+                PUBLIC ${MICROSTAR_MEMCHECK_COMPILE_OPTIONS}
+                )
+endif()
+
 set(LIVOX_PRIVATE_INCLUDE_DIR 
         ../3rdparty 
         .
