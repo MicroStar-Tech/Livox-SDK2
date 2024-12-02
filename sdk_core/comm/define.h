@@ -37,7 +37,8 @@
 namespace livox {
 namespace lidar {
 
-#pragma pack(1)
+// comment out because it will break std types
+// #pragma pack(1) 
 
 const uint16_t KDefaultTimeOut = 1000;
 static const uint32_t kMaxCommandBufferSize = 1400;
@@ -361,7 +362,7 @@ typedef void(*LivoxLidarRequestFirmwareInfoCallback)(livox_status status,
     uint32_t handle, LivoxLidarRequestFirmwareInfoResponse* response, void* client_data);
 
 
-#pragma pack()
+// #pragma pack()
 
 } // namespace lidar
 } // namespace livox

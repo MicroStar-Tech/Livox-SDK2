@@ -41,7 +41,8 @@
 namespace livox {
 namespace lidar {
 
-#pragma pack(1)
+// do not use pack on non-POD types
+// #pragma pack(1)
 
 typedef enum {
   kLidarLoggerCreate,
@@ -58,7 +59,7 @@ struct LogInfo {
   uint64_t total_log_size;
 };
 
-#pragma pack()
+// #pragma pack()
 
 class LoggerManager {
  private:
