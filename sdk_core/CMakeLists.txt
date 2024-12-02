@@ -74,6 +74,7 @@ set(MICROSTAR_GDB_COMPILE_OPTIONS
         )
 
 if(${MICROSTAR_DEBUG_GDB})
+        message(WARNING "[Livox-SDK2]Enable GDB debug symbols")
         target_compile_options(${SDK_LIBRARY_STATIC}
                 PRIVATE ${MICROSTAR_GDB_COMPILE_OPTIONS}
                 )
@@ -102,6 +103,7 @@ set(MICROSTAR_MEMCHECK_COMPILE_OPTIONS
 if(${MICROSTAR_DEBUG_MEMCHECK})
 # the memory check options must be enabled for all translation units including the downstream projects
 # so make them public
+        message(WARNING "[Livox-SDK2]Enable memcheck")
         target_compile_options(${SDK_LIBRARY_STATIC}
                 PUBLIC ${MICROSTAR_MEMCHECK_COMPILE_OPTIONS}
                 )

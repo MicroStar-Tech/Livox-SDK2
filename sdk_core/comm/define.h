@@ -131,6 +131,7 @@ typedef enum {
   kLidarSend = 1,
 } SendType;
 
+#pragma pack(push,1)
 typedef struct {
   uint8_t ret_code;
   uint8_t dev_type;
@@ -138,6 +139,7 @@ typedef struct {
   uint8_t lidar_ip[4];
   uint16_t cmd_port;
 } DetectionData;
+#pragma pack(pop)
 
 typedef struct {
   uint32_t handle;
@@ -161,18 +163,21 @@ typedef struct {
   uint16_t host_imu_data_port;
 } ViewLidarIpInfo;
 
-
+#pragma pack(push,1)
 typedef struct {
   uint8_t lidar_ipaddr[4];
   uint8_t lidar_subnet_mask[4];
   uint8_t lidar_gateway[4];
 } LivoxLidarIpInfoValue;
+#pragma pack(pop)
 
+#pragma pack(push,1)
 typedef struct {
   uint8_t host_ip[4];
   uint16_t host_port;
   uint16_t lidar_port;
 } HostIpInfoValue;
+#pragma pack(pop)
 
 static const uint16_t kDetectionPort           = 56000;
 static const uint16_t kDetectionListenPort     = 56001;
@@ -227,10 +232,12 @@ typedef enum {
   kLidarLogPort = 56500
 } LidarPort;
 
+#pragma pack(push,1)
 typedef struct {
   uint8_t log_type;
   uint8_t enable;
 } EnableDeviceLoggerRequest;
+#pragma pack(pop)
 
 typedef struct {
   std::string   sn;
@@ -239,6 +246,7 @@ typedef struct {
   std::uint16_t cmd_port;
 } LidarDeviceInfo;
 
+#pragma pack(push,1)
 typedef struct {
   uint8_t log_type;         // 0
   uint8_t file_index;       // file index
@@ -257,6 +265,7 @@ typedef struct {
   uint8_t file_index;      // 0 for cfg, 1 for log
   uint32_t trans_index;     //sequence of trans file
 } DeviceLoggerFilePushReponse;
+#pragma pack(pop)
 
 enum class Flag : uint8_t {
   kNull,
@@ -268,6 +277,7 @@ enum class Flag : uint8_t {
 using DataCallback = std::function<void(const uint32_t handle, const uint8_t dev_type, LivoxLidarEthernetPacket *data, void *client_data)>;
 using LidarInfoCallback = std::function<void(const uint32_t, const uint8_t, const char*, void*)>;
 
+#pragma pack(push,1)
 typedef struct {
   uint8_t firmware_type;    /**< firmware type. */
   uint8_t encrypt_type;     /**< encrypt type. */
@@ -346,6 +356,7 @@ typedef struct {
   } type;
   uint64_t ns;
 } LivoxLidarRmcSyncTimeRequest;
+#pragma pack(pop)
 
 typedef void(*LivoxLidarStartUpgradeCallback)(livox_status status, uint32_t handle,
     LivoxLidarStartUpgradeResponse* response, void* client_data);
