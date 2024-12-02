@@ -48,6 +48,7 @@ void PointCloudCallback(uint32_t handle, const uint8_t dev_type, LivoxLidarEther
 
   if (data->data_type == kLivoxLidarCartesianCoordinateHighData) {
     LivoxLidarCartesianHighRawPoint *p_point_data = (LivoxLidarCartesianHighRawPoint *)data->data;
+    (void)p_point_data;
     for (uint32_t i = 0; i < data->dot_num; i++) {
       //p_point_data[i].x;
       //p_point_data[i].y;
@@ -56,8 +57,10 @@ void PointCloudCallback(uint32_t handle, const uint8_t dev_type, LivoxLidarEther
   }
   else if (data->data_type == kLivoxLidarCartesianCoordinateLowData) {
     LivoxLidarCartesianLowRawPoint *p_point_data = (LivoxLidarCartesianLowRawPoint *)data->data;
+    (void)p_point_data;
   } else if (data->data_type == kLivoxLidarSphericalCoordinateData) {
     LivoxLidarSpherPoint* p_point_data = (LivoxLidarSpherPoint *)data->data;
+    (void)p_point_data;
   }
 }
 
