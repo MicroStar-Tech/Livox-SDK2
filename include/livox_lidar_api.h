@@ -103,6 +103,13 @@ void SetLivoxLidarImuDataCallback(LivoxLidarImuDataCallback cb, void* client_dat
 void SetLivoxLidarInfoCallback(LivoxLidarInfoCallback cb, void* client_data);
 
 /**
+ * Set the callback to receive direct LIDAR Status Info.
+ * @param cb                     callback to receive Status Info.
+ * @param client_data            user data associated with the command.
+ */
+void SetLivoxDirectLidarStateInfoCallback(LivoxDirectLidarStateInfoCallback cb, void* client_data);
+
+/**
  * DisableLivoxLidar console log output.
  */
 void DisableLivoxSdkConsoleLogger();

@@ -84,9 +84,11 @@ void HapCommandHandler::OnCommandAck(uint32_t handle, const Command &command) {
 
 void HapCommandHandler::OnCommandCmd(const uint32_t handle, uint16_t lidar_port, const Command& command) {
   if (command.packet.cmd_id == kCommandIDLidarPushMsg && lidar_port == kHAPPushMsgPort) {
-    std::string info;
-    ParseLidarStateInfo::Parse(command.packet, info);
-    GeneralCommandHandler::GetInstance().PushLivoxLidarInfo(handle, info);
+    std::string info_str;
+    DirectLidarStateInfo state_info;
+    ParseLidarStateInfo::Parse(command.packet, state_info, info_str);
+    GeneralCommandHandler::GetInstance().PushLivoxDirectLidarStateInfo(handle, state_info);
+    GeneralCommandHandler::GetInstance().PushLivoxLidarInfo(handle, info_str);
   }
 }
 

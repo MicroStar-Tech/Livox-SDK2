@@ -163,6 +163,10 @@ void SetLivoxLidarInfoCallback(LivoxLidarInfoCallback cb, void* client_data) {
   GeneralCommandHandler::GetInstance().SetLivoxLidarInfoCallback(cb, client_data);
 }
 
+void SetLivoxDirectLidarStateInfoCallback(LivoxDirectLidarStateInfoCallback cb, void* client_data) {
+  GeneralCommandHandler::GetInstance().SetLivoxDirectLidarStateInfoCallback(cb, client_data);
+}
+
 void SetLivoxLidarInfoChangeCallback(LivoxLidarInfoChangeCallback cb, void* client_data) {
   GeneralCommandHandler::GetInstance().SetLivoxLidarInfoChangeCallback(cb, client_data);
 }

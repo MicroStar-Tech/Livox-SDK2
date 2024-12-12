@@ -84,9 +84,11 @@ void Mid360CommandHandler::OnCommandAck(uint32_t handle, const Command &command)
 
 void Mid360CommandHandler::OnCommandCmd(uint32_t handle, const uint16_t lidar_port, const Command &command) {
   if (command.packet.cmd_id == kCommandIDLidarPushMsg && lidar_port == kMid360LidarPushMsgPort) {
-    std::string info; 
-    ParseLidarStateInfo::Parse(command.packet, info);
-    GeneralCommandHandler::GetInstance().PushLivoxLidarInfo(handle, info);
+    std::string info_str;
+    DirectLidarStateInfo state_info;
+    ParseLidarStateInfo::Parse(command.packet, state_info, info_str);
+    GeneralCommandHandler::GetInstance().PushLivoxDirectLidarStateInfo(handle, state_info);
+    GeneralCommandHandler::GetInstance().PushLivoxLidarInfo(handle, info_str);
   }
 }
 

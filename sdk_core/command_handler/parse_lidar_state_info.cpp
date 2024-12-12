@@ -21,6 +21,18 @@ bool ParseLidarStateInfo::Parse(const CommPacket& packet, std::string& info_str)
   return true;
 }
 
+bool ParseLidarStateInfo::Parse(const CommPacket& packet, DirectLidarStateInfo& info, std::string& info_str)
+{
+  std::set<ParamKeyName> key_mask;
+  
+  if (!ParseStateInfo(packet, info, key_mask)) {
+    return false;
+  }
+
+  LivoxLidarStateInfoToJson(info, key_mask, info_str);
+  return true;
+}
+
 bool ParseLidarStateInfo::ParseStateInfo(const CommPacket& packet,
                                          DirectLidarStateInfo& info,
                                          std::set<ParamKeyName>& key_mask) {  

@@ -554,6 +554,18 @@ void GeneralCommandHandler::PushLivoxLidarInfo(const uint32_t handle, const std:
   }
 }
 
+void GeneralCommandHandler::PushLivoxDirectLidarStateInfo(const uint32_t handle, const DirectLidarStateInfo &info)
+{
+  std::lock_guard<std::mutex> lock(dev_type_mutex_);
+  if (device_dev_type_.find(handle) != device_dev_type_.end()) {
+    uint8_t dev_type = device_dev_type_[handle];
+
+    if (livox_direct_lidar_state_info_cb_) {
+      livox_direct_lidar_state_info_cb_(handle, dev_type, info, livox_direct_lidar_state_info_client_data_);
+    }
+  }
+}
+
 std::shared_ptr<CommandHandler> GeneralCommandHandler::GetLidarCommandHandler(const uint32_t handle) {
   std::lock_guard<std::mutex> lock(dev_type_mutex_);
   if (device_dev_type_.find(handle) != device_dev_type_.end()) {

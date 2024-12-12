@@ -38,6 +38,9 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <csignal>
+#include <condition_variable>
+#include <fmt/format.h>
 
 void PointCloudCallback(uint32_t handle, const uint8_t dev_type, LivoxLidarEthernetPacket* data, void* client_data) {
   if (data == nullptr) {
@@ -181,7 +184,35 @@ void LivoxLidarPushMsgCallback(const uint32_t handle, const uint8_t dev_type, co
   return;
 }
 
+void DirectLidarStateInfoCallback(const uint32_t handle, const uint8_t dev_type, 
+  const DirectLidarStateInfo &direct_info, void* client_data) {
+
+  std::cout << fmt::format(
+    "DirectLidarStateInfoCallback "
+     "handle: {}, dev_type: {:d}, work target mode: {:d}, current work state: {:d},"
+     "hms_code: [{:d}, {:d}, {:d}, {:d}, {:d}, {:d}, {:d}, {:d}]\n",
+     handle, dev_type, direct_info.work_tgt_mode, direct_info.cur_work_state, 
+     direct_info.hms_code[0], direct_info.hms_code[1], direct_info.hms_code[2],
+     direct_info.hms_code[3], direct_info.hms_code[4], direct_info.hms_code[5],
+     direct_info.hms_code[6], direct_info.hms_code[7]);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+volatile static std::sig_atomic_t finished{ 0 };
+static std::condition_variable cv;
+static std::mutex cv_mutex;
+static void signal_handler(int sig);
+
 int main(int argc, const char *argv[]) {
+
+// define termination signals
+  (void)std::signal(SIGHUP, &signal_handler);
+  (void)std::signal(SIGKILL, &signal_handler);
+  (void)std::signal(SIGTERM, &signal_handler);
+  (void)std::signal(SIGINT, &signal_handler);
+  (void)std::signal(SIGQUIT, &signal_handler);
+  (void)std::signal(SIGPIPE, &signal_handler);
+
   if (argc != 2) {
     printf("Params Invalid, must input config path.\n");
     return -1;
@@ -203,16 +234,28 @@ int main(int argc, const char *argv[]) {
   SetLivoxLidarImuDataCallback(ImuDataCallback, nullptr);
   
   SetLivoxLidarInfoCallback(LivoxLidarPushMsgCallback, nullptr);
+
+  SetLivoxDirectLidarStateInfoCallback(DirectLidarStateInfoCallback, nullptr);
   
   // REQUIRED, to get a handle to targeted lidar and set its work mode to NORMAL
   SetLivoxLidarInfoChangeCallback(LidarInfoChangeCallback, nullptr);
 
-#ifdef WIN32
-  Sleep(300000);
-#else
-  sleep(300);
-#endif
+  std::unique_lock<std::mutex> cv_lck{ cv_mutex };
+  cv.wait_for(cv_lck, std::chrono::seconds(300), [&] { return finished; });
   LivoxLidarSdkUninit();
   printf("Livox Quick Start Demo End!\n");
   return 0;
+}
+
+/* catch signal and then gracefully exit */
+void
+signal_handler(int sig)
+{
+    if(sig == SIGPIPE)
+    {
+        return;
+    }
+    /* tell the program to stop */
+    finished = 1;
+    cv.notify_all();
 }

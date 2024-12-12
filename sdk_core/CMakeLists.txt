@@ -73,6 +73,7 @@ set(MICROSTAR_GDB_COMPILE_OPTIONS
         -g3
         )
 
+# cmake .. -DMICROSTAR_DEBUG_GDB=1 to enable gdb debug symbols        
 if(${MICROSTAR_DEBUG_GDB})
         message(WARNING "[Livox-SDK2]Enable GDB debug symbols")
         target_compile_options(${SDK_LIBRARY_STATIC}
@@ -100,6 +101,7 @@ set(MICROSTAR_MEMCHECK_COMPILE_OPTIONS
         -fsanitize=vptr,builtin
         )
 
+# cmake .. -DMICROSTAR_DEBUG_MEMCHECK=1 to enable memcheck
 if(${MICROSTAR_DEBUG_MEMCHECK})
 # the memory check options must be enabled for all translation units including the downstream projects
 # so make them public

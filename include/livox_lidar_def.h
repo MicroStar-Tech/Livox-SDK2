@@ -519,6 +519,13 @@ typedef void (*LivoxLidarImuDataCallback)(const uint32_t handle, const uint8_t d
 typedef void(*LivoxLidarInfoCallback)(const uint32_t handle, const uint8_t dev_type, const char* info, void* client_data);
 
 /**
+ * Callback function for receiving direct LIDAR Status Info.
+ * @param direct_info            direct status info.
+ * @param client_data            user data associated with the command.
+ */
+typedef void(*LivoxDirectLidarStateInfoCallback)(const uint32_t handle, const uint8_t dev_type, const DirectLidarStateInfo &direct_info, void* client_data);
+
+/**
  * Callback function for receiving Status Info.
  * @param status                 status info.
  * @param client_data            user data associated with the command.
