@@ -17,4 +17,7 @@ if (UNIX)
 endif(UNIX)
 
 add_subdirectory(sdk_core)
-add_subdirectory(samples)
+
+if(${PROJECT_IS_TOP_LEVEL})
+  add_subdirectory(samples)
+endif()
