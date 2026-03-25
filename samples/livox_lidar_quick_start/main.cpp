@@ -178,7 +178,7 @@ void LidarInfoChangeCallback(const uint32_t handle, const LivoxLidarInfo* info, 
   printf("LidarInfoChangeCallback Lidar handle: %u SN: %s\n", handle, info->sn);
 
   // set lidar esc mode
-  SetLivoxLidarEscMode(handle, kLivoxEscSpeedSlow, EscModeSetCallback, nullptr);
+  // SetLivoxLidarEscMode(handle, kLivoxEscSpeedSlow, EscModeSetCallback, nullptr);
   
   // set the work mode to kLivoxLidarNormal, namely start the lidar
   SetLivoxLidarWorkMode(handle, kLivoxLidarNormal, WorkModeCallback, nullptr);
