@@ -46,8 +46,12 @@ void PointCloudCallback(uint32_t handle, const uint8_t dev_type, LivoxLidarEther
   if (data == nullptr) {
     return;
   }
-  printf("point cloud handle: %u, data_num: %d, data_type: %d, length: %d, frame_counter: %d\n",
-      handle, data->dot_num, data->data_type, data->length, data->frame_cnt);
+  
+  uint64_t timestamp_ns{};
+  memcpy(&timestamp_ns, data->timestamp, sizeof(uint64_t));
+
+  printf("point cloud handle: %u, timestamp: %lu, data_num: %d, data_type: %d, length: %d, frame_counter: %d\n",
+      handle, timestamp_ns, data->dot_num, data->data_type, data->length, data->frame_cnt);
 
   if (data->data_type == kLivoxLidarCartesianCoordinateHighData) {
     LivoxLidarCartesianHighRawPoint *p_point_data = (LivoxLidarCartesianHighRawPoint *)data->data;
